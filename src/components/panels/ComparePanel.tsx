@@ -91,7 +91,7 @@ export function ComparePanel({ sc, computed }: { sc: Scenario; computed: Compute
                       <td className="num">{r.ok ? u.n(r.cop, 2) : t('cmp.not_applicable')}</td>
                       <td className="num">{r.ok ? u.show('power', r.W, 1) : '—'}</td>
                       <td className="num">{r.ok ? u.show('temp', r.Tdis, 0) : '—'}</td>
-                      <td className="num">{r.ok ? `${u.n(r.Vdisp * 3600, 1)} m³/h` : '—'}</td>
+                      <td className="num">{r.ok ? u.show('airflow', r.Vdisp, 1) : '—'}</td>
                     </tr>
                   ))}
               </tbody>

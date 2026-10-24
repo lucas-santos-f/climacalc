@@ -109,7 +109,7 @@ export function EquipmentPanel({ sc, computed }: { sc: Scenario; computed: Compu
             sub={t(`eq.system.${E.system}`)}
           />
           <Stat label={t('eq.unit_size')} value={E.units.unitLabel} sub={`${u.show('power', E.units.unitKW, 1)} × ${E.units.operating} ${t('eq.operating').toLowerCase()} · ${E.units.installed} ${t('eq.installed').toLowerCase()}`} />
-          {E.units.indoorUnitKW > 0 && <Stat label={t('eq.indoor_units')} value={E.units.indoorUnits} sub={`≈ ${u.show('power', E.units.indoorUnitKW, 1)} ${t('common.value').toLowerCase()}`} />}
+          {E.units.indoorUnitKW > 0 && <Stat label={t('eq.indoor_units')} value={E.units.indoorUnits} sub={`≈ ${u.show('power', E.units.indoorUnitKW, 1)} / un.`} />}
           <Stat label={t('eq.cop_nominal')} value={u.n(E.cop.nominal, 2)} sub={preset.copLabel} />
           <Stat label={t('eq.cop_cycle')} value={E.cop.cycle !== null ? u.n(E.cop.cycle, 2) : '—'} sub={`${t('eq.cond_conditions')}: ${u.val('temp', E.cop.tEvap, 0)} / ${u.show('temp', E.cop.tCond, 0)}`} />
         </div>
@@ -272,7 +272,7 @@ export function EquipmentPanel({ sc, computed }: { sc: Scenario; computed: Compu
                 <Stat label={t('cyc.Tdis')} value={u.show('temp', cycle.stages[0].Tdischarge - K0, 0)} />
                 <Stat label={t('cyc.pr')} value={u.n(cycle.stages[0].pressureRatio, 2)} sub={`${u.show('pressure', cycle.Pevap, 2)} → ${u.show('pressure', cycle.Pcond, 2)}`} />
                 <Stat label={t('cyc.mdot')} value={u.show('massflow', cycle.stages[0].mdot, 3)} />
-                <Stat label={t('cyc.Vdisp')} value={`${u.n(cycle.stages[0].Vdisplacement * 3600, 1)} m³/h`} sub={`η_is ${u.n(cycle.stages[0].etaIs * 100, 0)} % · η_vol ${u.n(cycle.stages[0].etaVol * 100, 0)} %`} />
+                <Stat label={t('cyc.Vdisp')} value={u.show('airflow', cycle.stages[0].Vdisplacement, 1)} sub={`η_is ${u.n(cycle.stages[0].etaIs * 100, 0)} % · η_vol ${u.n(cycle.stages[0].etaVol * 100, 0)} %`} />
               </div>
               <div className="table-wrap" style={{ marginTop: 10 }}>
                 <table className="kv">
