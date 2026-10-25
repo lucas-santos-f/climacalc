@@ -4,7 +4,7 @@ Calculadora visual de **carga térmica, psicrometria e seleção de equipamento 
 
 Fork do FrigoCalc (refrigeração comercial/industrial) com o mesmo motor termodinâmico, mas voltado para climatização de ambientes ocupados.
 
-- **Site:** fora do ar (só será publicado em domínio neutro, sem nome do autor)
+- **Site:** https://climacalc.frioeclima.workers.dev
 - 100 % no navegador — nenhum dado sai do dispositivo; cenários ficam no armazenamento local e podem ser compartilhados por link, JSON ou CSV.
 - Português / inglês, unidades SI / IP, tema claro / escuro, impressão em PDF.
 
