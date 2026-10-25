@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
+import { Moon, Sun } from 'lucide-react'
 import { decodeShare, useCurrentScenario, useStore, type Tab } from './state/store'
 import { useComputed, useT } from './hooks'
 import { LANGS } from './i18n'
@@ -9,15 +10,14 @@ import { EquipmentPanel } from './components/panels/EquipmentPanel'
 import { ComparePanel } from './components/panels/ComparePanel'
 import { AboutPanel } from './components/panels/AboutPanel'
 
-type ThemePref = 'auto' | 'light' | 'dark'
+type Theme = 'light' | 'dark'
 const THEME_KEY = 'climacalc:theme'
 
-function readTheme(): ThemePref {
+function savedTheme(): Theme {
   try {
-    const v = localStorage.getItem(THEME_KEY)
-    return v === 'light' || v === 'dark' ? v : 'auto'
+    return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'
   } catch {
-    return 'auto'
+    return 'light'
   }
 }
 
@@ -26,15 +26,14 @@ export default function App() {
   const sc = useCurrentScenario()
   const computed = useComputed(sc)
   const { lang, setLang, units, setUnits, tab, setTab, toast, importScenario, showToast } = useStore()
-  const [theme, setTheme] = useState<ThemePref>(readTheme)
+  const [theme, setTheme] = useState<Theme>(savedTheme)
 
-  useEffect(() => {
-    if (theme === 'auto') document.documentElement.removeAttribute('data-theme')
-    else document.documentElement.setAttribute('data-theme', theme)
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = theme
     try {
       localStorage.setItem(THEME_KEY, theme)
     } catch {
-      /* armazenamento indisponível */
+      // storage can be blocked (private mode); the theme just won't stick
     }
   }, [theme])
 
@@ -42,7 +41,7 @@ export default function App() {
     document.documentElement.lang = lang
   }, [lang])
 
-  // importa cenário vindo de link de compartilhamento (#s=...)
+  // a shared link carries the whole scenario in the hash (#s=...)
   useEffect(() => {
     const m = /^#s=([A-Za-z0-9+\-$_.!*'(),%]+)$/.exec(location.hash)
     if (!m) return
@@ -64,63 +63,62 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="brand">
-          <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true">
-            <rect width="64" height="64" rx="14" fill="rgba(255,255,255,0.15)" />
-            <path d="M14 40c6-10 14-10 18 0s12 10 18 0" stroke="currentColor" strokeWidth="5" strokeLinecap="round" fill="none" />
-            <path d="M14 26c6-10 14-10 18 0s12 10 18 0" stroke="currentColor" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.7" />
-            <circle cx="50" cy="16" r="5" fill="#7fd1ff" />
-          </svg>
-          <h1>
-            {t('app.title')}
-            <small>{t('app.subtitle')}</small>
-          </h1>
-        </div>
-        <div className="header-controls">
-          <div className="seg" role="group" aria-label={t('app.lang')}>
-            {LANGS.map((l) => (
-              <button key={l.id} type="button" className={lang === l.id ? 'active' : ''} onClick={() => setLang(l.id)}>
-                {l.label}
-              </button>
-            ))}
+      <header className="topbar">
+        <div className="container">
+          <div className="brand">
+            <span className="brand-mark" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round">
+                <path d="M10 40c7-10 15-10 22 0s15 10 22 0" />
+                <path d="M10 24c7-10 15-10 22 0s15 10 22 0" opacity="0.65" />
+              </svg>
+            </span>
+            <div className="brand-text">
+              <div className="brand-name">{t('app.title')}</div>
+              <div className="brand-tagline">{t('app.subtitle')}</div>
+            </div>
           </div>
-          <div className="seg" role="group" aria-label={t('app.units')}>
-            {(['SI', 'IP'] as const).map((s) => (
-              <button key={s} type="button" className={units === s ? 'active' : ''} onClick={() => setUnits(s)}>
-                {s}
-              </button>
-            ))}
-          </div>
-          <div className="seg" role="group" aria-label={t('app.theme')}>
-            {(['auto', 'light', 'dark'] as const).map((th) => (
-              <button key={th} type="button" className={theme === th ? 'active' : ''} onClick={() => setTheme(th)} title={th}>
-                {th === 'auto' ? 'A' : th === 'light' ? '☀' : '☾'}
-              </button>
-            ))}
+          <div className="settings">
+            <div className="seg" role="group" aria-label={t('app.lang')}>
+              {LANGS.map((l) => (
+                <button key={l.id} type="button" className={lang === l.id ? 'active' : ''} aria-pressed={lang === l.id} onClick={() => setLang(l.id)}>
+                  {l.label}
+                </button>
+              ))}
+            </div>
+            <div className="seg" role="group" aria-label={t('app.units')}>
+              {(['SI', 'IP'] as const).map((s) => (
+                <button key={s} type="button" className={units === s ? 'active' : ''} aria-pressed={units === s} onClick={() => setUnits(s)}>
+                  {s}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="btn icon ghost" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={t('app.theme')} title={t('app.theme')}>
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           </div>
         </div>
       </header>
 
-      <ScenarioBar sc={sc} computed={computed} />
-
-      <nav className="tabs no-print" aria-label="Seções">
-        {tabs.map((tb) => (
-          <button key={tb.id} type="button" className={tab === tb.id ? 'active' : ''} onClick={() => setTab(tb.id)}>
-            {tb.label}
-          </button>
-        ))}
+      <nav className="tabbar" aria-label={t('app.sections')}>
+        <div className="container tabs">
+          {tabs.map((tb) => (
+            <button key={tb.id} type="button" className={tab === tb.id ? 'active' : ''} aria-current={tab === tb.id ? 'page' : undefined} onClick={() => setTab(tb.id)}>
+              {tb.label}
+            </button>
+          ))}
+        </div>
       </nav>
 
-      <main className="main">
-        <div className="print-only" style={{ marginBottom: 12 }}>
+      <main className="main container">
+        <div className="print-only" style={{ marginBottom: 16 }}>
           <h1>
-            {t('app.title')} — {sc.name}
+            {t('app.title')}: {sc.name}
           </h1>
           <div className="muted">
             {t(`environment.${sc.environment}`)} · {new Date(sc.updatedAt).toLocaleString(lang)}
           </div>
         </div>
+        <ScenarioBar sc={sc} computed={computed} />
         {tab === 'load' && <LoadPanel sc={sc} computed={computed} />}
         {tab === 'air' && <AirPanel sc={sc} computed={computed} />}
         {tab === 'equipment' && <EquipmentPanel sc={sc} computed={computed} />}
@@ -129,7 +127,10 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        {t('app.footer')} · {t('scenario.saved')} · v{__APP_VERSION__}
+        <div className="container">
+          <span>{t('app.footer')}</span>
+          <span>v{__APP_VERSION__}</span>
+        </div>
       </footer>
       {toast && (
         <div className="toast" role="status">

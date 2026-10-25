@@ -1,4 +1,4 @@
-// Validação estrita de cenários (importação de arquivo, links de compartilhamento e localStorage).
+// Strict scenario validation for imported files, share links and localStorage.
 import { z } from 'zod'
 import type { Scenario } from '../engine/types'
 

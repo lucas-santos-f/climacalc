@@ -1,21 +1,31 @@
-# Política de segurança — ClimaCalc
+# Security policy
 
-## Modelo
+## Threat model
 
-- Aplicação 100 % estática (SPA) servida pelo Cloudflare Workers Static Assets. Não há backend, banco de dados, autenticação nem coleta de dados.
-- Os cenários do usuário ficam apenas no `localStorage` do navegador (`climacalc:v1`). Links de compartilhamento carregam o cenário comprimido no fragmento da URL (`#s=`), que nunca é enviado ao servidor.
+ClimaCalc is a static site. All calculations run in the user's browser and no data is sent anywhere. Saved scenarios live only in the browser's `localStorage`. There is no login, no database and no API of its own.
 
-## Controles
+What can still reach the app from outside:
 
-| Camada | Controle |
+- **Share links** (`#s=...`): the scenario is decoded and checked against a strict Zod schema before it is used. The URL fragment never reaches the server and nothing in it is executed.
+- **Imported JSON files:** the same schema check plus a 256 kB size limit. Nothing in them is treated as code.
+- **Dependencies:** versions pinned by the lockfile, `npm audit` in CI, grouped monthly Dependabot updates and CodeQL.
+- **Hosting** (Cloudflare Workers Static Assets): HTTPS only, HSTS, a strict CSP with no `unsafe-eval` and no third-party scripts, and `frame-ancestors 'none'` (see `public/_headers`).
+
+## Controls
+
+| Control | Where |
 | --- | --- |
-| Cabeçalhos HTTP (`public\_headers`) | `Content-Security-Policy` estrita (`default-src 'none'`, `script-src 'self'`, sem `unsafe-eval`/`unsafe-inline` em scripts), `Strict-Transport-Security` com preload, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` restritiva, `Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`, `Cross-Origin-Resource-Policy`. |
-| Validação de entrada | Todo JSON importado, link `#s=` e conteúdo do `localStorage` passa por esquemas Zod (`src\state\schema.ts`) com tipos, enumerações e limites numéricos; tamanho máximo de importação 256 kB; nomes de arquivo sanitizados. |
-| Dependências | `npm audit` no CI, Dependabot mensal e agrupado (npm e GitHub Actions), lockfile versionado. |
-| Código | ESLint 9 + TypeScript estrito; CodeQL (JavaScript/TypeScript); gitleaks para segredos. |
-| Segredos | Nenhum segredo no repositório. Tokens de deploy ficam apenas em *GitHub Secrets* / Cloudflare. `.env*` ignorado pelo Git. |
-| Publicação | Deploy manual (`npm run deploy`) ou GitHub Actions com `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` e variável `CF_DEPLOY_ENABLED=true`. |
+| CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy, COOP/COEP/CORP | `public/_headers` |
+| No `eval`, `new Function` or `dangerouslySetInnerHTML` | ESLint rules and code review |
+| Validation of share links, imported files and stored scenarios | `src/state/schema.ts` |
+| Secret scanning (gitleaks over the full history), CodeQL, `npm audit` | `.github/workflows/` |
+| Dependabot for npm, GitHub Actions and pip | `.github/dependabot.yml` |
+| Deploy tokens kept in GitHub Secrets and Cloudflare only; `.env` files ignored | `.gitignore` |
 
-## Relato de vulnerabilidades
+## Reporting a vulnerability
 
-Abra uma *issue* privada (GitHub → Security → Report a vulnerability) deste projeto ou contate o autor pelo GitHub. Não divulgue publicamente antes da correção.
+Please open a private security advisory on GitHub (**Security → Report a vulnerability** on this repository) instead of a public issue with exploitable details. You should get a first reply within 7 days.
+
+## Supported versions
+
+Only the version deployed from `main` gets fixes.

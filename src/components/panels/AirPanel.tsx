@@ -9,7 +9,7 @@ export function AirPanel({ sc, computed }: { sc: Scenario; computed: Computed })
   const L = computed.load
   const A = L.air
   return (
-    <div className="grid wide">
+    <div className="stack">
       <Card title={t('air.title')} hint={t('air.hint')}>
         <div className="stats">
           <Stat
@@ -32,7 +32,14 @@ export function AirPanel({ sc, computed }: { sc: Scenario; computed: Computed })
           <Stat label={t('air.coil_load')} value={u.show('power', A.coilKW, 1)} sub={`${t('load.coil_total')}: ${u.show('power', L.coilTotal / 1000, 1)}`} />
         </div>
         <Alerts warnings={A.warnings} />
-        <div className="table-wrap" style={{ marginTop: 10 }}>
+      </Card>
+
+      <Card title={t('air.chart_title')}>
+        <PsychroChart air={A} P={L.outdoor.P} />
+      </Card>
+
+      <Card title={t('air.states')} hint={`P = ${u.n(L.outdoor.P, 1)} kPa · ${u.show('length', sc.site.altitude, 0)}`}>
+        <div className="table-wrap">
           <table className="kv">
             <thead>
               <tr>
@@ -57,7 +64,7 @@ export function AirPanel({ sc, computed }: { sc: Scenario; computed: Computed })
               {A.states.map((s) => (
                 <tr key={s.id}>
                   <td>
-                    <b>{s.id}</b> — {t(`air.state.${s.id}`)}
+                    <b>{s.id}</b> <span className="muted">{t(`air.state.${s.id}`)}</span>
                   </td>
                   <td className="num">{u.val('temp', s.T, 1)}</td>
                   <td className="num">{u.n(s.W * 1000, 2)}</td>
@@ -70,12 +77,6 @@ export function AirPanel({ sc, computed }: { sc: Scenario; computed: Computed })
             </tbody>
           </table>
         </div>
-        <p className="muted" style={{ fontSize: '0.78rem', marginTop: 8 }}>
-          P = {u.n(L.outdoor.P, 1)} kPa ({u.show('length', sc.site.altitude, 0)})
-        </p>
-      </Card>
-      <Card title={t('air.chart_title')}>
-        <PsychroChart air={A} P={L.outdoor.P} />
       </Card>
     </div>
   )

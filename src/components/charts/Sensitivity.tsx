@@ -11,7 +11,7 @@ export interface SweepPoint {
   latentKW: number
 }
 
-/** Carga (kW) em função de uma temperatura, com divisão sensível/latente. */
+// Load (kW) as a function of one temperature, split into sensible and latent.
 export function LoadSensitivity({ data, xLabel, current }: { data: SweepPoint[]; xLabel: string; current: number }) {
   const t = useT()
   const theme = useTheme()
@@ -26,7 +26,7 @@ export function LoadSensitivity({ data, xLabel, current }: { data: SweepPoint[];
       legend: { top: 0, textStyle: { color: c.text, fontSize: 11 } },
       tooltip: { trigger: 'axis', valueFormatter: (v: number) => `${v} ${unitLabel('power', sys)}` },
       xAxis: { type: 'category', data: data.map((d) => tx(d.x)), name: `${xLabel} (${unitLabel('temp', sys)})`, nameLocation: 'middle', nameGap: 26, axisLabel: { color: c.muted }, axisLine: { lineStyle: { color: c.grid } } },
-      yAxis: { type: 'value', name: unitLabel('power', sys), axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.grid, opacity: 0.5 } } },
+      yAxis: { type: 'value', name: unitLabel('power', sys), axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.grid, type: 'dashed' } } },
       series: [
         { type: 'line', name: t('load.capacity'), data: data.map((d) => p(d.capacityKW)), smooth: true, symbol: 'none', lineStyle: { width: 2.5, color: c.primary }, itemStyle: { color: c.primary }, markLine: { symbol: 'none', data: [{ xAxis: tx(current) }], lineStyle: { color: '#dc2626', type: 'dashed' }, label: { show: false } } },
         { type: 'line', name: t('load.sensible'), data: data.map((d) => p(d.sensibleKW)), smooth: true, symbol: 'none', lineStyle: { width: 1.5, color: '#d97706' }, itemStyle: { color: '#d97706' } },

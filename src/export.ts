@@ -1,15 +1,17 @@
-// Exportação CSV (abre no Excel) dos resultados do cenário atual.
+// CSV export of the current scenario. Separators follow the UI language so the file opens
+// cleanly in a spreadsheet using that locale (pt-BR expects ';' and decimal commas).
 import type { Computed, TFn } from './hooks'
 import type { Scenario } from './engine/types'
+import type { Lang } from './i18n'
 import { downloadBlob, safeFileName } from './state/store'
 import { itemLabel } from './labels'
 
-function csvEscape(v: string | number): string {
-  const s = typeof v === 'number' ? v.toLocaleString('pt-BR', { maximumFractionDigits: 3, useGrouping: false }) : v
-  return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+function csvCell(v: string | number, lang: Lang, sep: string): string {
+  const s = typeof v === 'number' ? v.toLocaleString(lang, { maximumFractionDigits: 3, useGrouping: false }) : v
+  return s.includes(sep) || /["\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 
-export function buildCsv(sc: Scenario, c: Computed, t: TFn): string {
+export function buildCsv(sc: Scenario, c: Computed, t: TFn, lang: Lang = 'en'): string {
   const rows: (string | number)[][] = []
   const L = c.load
   const E = c.equipment
@@ -33,7 +35,7 @@ export function buildCsv(sc: Scenario, c: Computed, t: TFn): string {
   rows.push([t('air.t_supply') + ' (°C)', L.air.tSupply])
   rows.push([t('air.adp') + ' (°C)', L.air.adp ?? ''])
   rows.push([t('air.bypass'), L.air.bypassFactor ?? ''])
-  for (const s of L.air.states) rows.push([t(`air.state.${s.id}`), `T ${s.T.toFixed(1)} °C`, `W ${(s.W * 1000).toFixed(2)} g/kg`, `UR ${(s.RH * 100).toFixed(0)} %`, `h ${s.h.toFixed(1)} kJ/kg`])
+  for (const s of L.air.states) rows.push([t(`air.state.${s.id}`), `T ${s.T.toFixed(1)} °C`, `W ${(s.W * 1000).toFixed(2)} g/kg`, `RH ${(s.RH * 100).toFixed(0)} %`, `h ${s.h.toFixed(1)} kJ/kg`])
   rows.push([])
   rows.push([t('eq.results'), t(`eq.system.${E.system}`), sc.equipment.refrigerant])
   rows.push([t('eq.unit_size'), E.units.unitLabel, E.units.unitKW])
@@ -47,9 +49,10 @@ export function buildCsv(sc: Scenario, c: Computed, t: TFn): string {
   rows.push([t('eq.kWPerTR'), E.electrical.kWPerTR])
   rows.push([t('eq.charge') + ' (kg)', E.refrigerant.chargeKg])
   rows.push([t('eq.co2e') + ' (t)', E.refrigerant.co2eTon])
-  return '﻿' + rows.map((r) => r.map(csvEscape).join(';')).join('\r\n')
+  const sep = lang === 'pt-BR' ? ';' : ','
+  return '﻿' + rows.map((r) => r.map((v) => csvCell(v, lang, sep)).join(sep)).join('\r\n')
 }
 
-export function exportCsv(sc: Scenario, c: Computed, t: TFn): void {
-  downloadBlob(new Blob([buildCsv(sc, c, t)], { type: 'text/csv;charset=utf-8' }), `${safeFileName(sc.name)}.csv`)
+export function exportCsv(sc: Scenario, c: Computed, t: TFn, lang: Lang): void {
+  downloadBlob(new Blob([buildCsv(sc, c, t, lang)], { type: 'text/csv;charset=utf-8' }), `${safeFileName(sc.name)}.csv`)
 }

@@ -1,4 +1,4 @@
-// Tipos centrais do ClimaCalc. Unidades internas: SI (W/kW, °C na entrada, K no motor termodinâmico, kPa, kJ/kg, m, m², m³, m³/h).
+// Core ClimaCalc types. Internal units are SI: W/kW, °C for input, K in the thermodynamic code, kPa, kJ/kg, m, m², m³, m³/h.
 
 export type EnvironmentId = 'office' | 'meeting_room' | 'classroom' | 'gym' | 'residence' | 'retail' | 'restaurant' | 'hotel_room' | 'hospital_room' | 'auditorium' | 'server_room' | 'custom'
 
@@ -13,31 +13,31 @@ export type SystemType = 'single' | 'two_stage' | 'cascade' | 'transcritical'
 
 export interface Site {
   city: string
-  tExt: number // °C bulbo seco de projeto
-  twbExt: number // °C bulbo úmido coincidente
-  dailyRange: number // K amplitude diária
+  tExt: number // °C, design dry bulb
+  twbExt: number // °C, coincident wet bulb
+  dailyRange: number // K, mean daily range
   altitude: number // m
   tInt: number // °C
   rhInt: number // %
 }
 
 export interface RoomGeom {
-  length: number // m (fachadas N e S)
-  width: number // m (fachadas E e W)
+  length: number // m, along the N and S facades
+  width: number // m, along the E and W facades
   height: number // m
 }
 
 export interface Wall {
   orientation: Orientation
-  exposed: boolean // false = parede interna para espaço não climatizado
-  areaOverride: number | null // m² (null = calculada pelas dimensões)
+  exposed: boolean // false = interior partition next to an unconditioned space
+  areaOverride: number | null // m²; null = from the room dimensions
   uValue: number // W/m²K
   mass: MassClass
   color: SurfaceColor
   glassArea: number // m²
   glassU: number // W/m²K
   glassShgc: number // 0–1
-  shading: number // 0–1 fator de sombreamento (1 = sem proteção)
+  shading: number // 0–1 shading factor (1 = unshaded)
 }
 
 export interface Roof {
@@ -53,13 +53,13 @@ export interface Floor {
 }
 
 export interface InternalGains {
-  people: number | null // null = densidade × área
-  areaPerPerson: number // m²/pessoa
+  people: number | null // null = floor area / areaPerPerson
+  areaPerPerson: number // m²/person
   activity: ActivityId
   lightingWPerM2: number
-  lightingFactor: number // reator/perdas (1,0 LED; 1,2 fluorescente)
+  lightingFactor: number // ballast / driver losses (1.0 LED, 1.2 fluorescent)
   equipmentWPerM2: number
-  equipmentKW: number // carga fixa adicional (servidores, cozinha…)
+  equipmentKW: number // extra fixed load (servers, kitchen, etc.)
   diversityPeople: number // 0–1
   diversityLights: number
   diversityEquipment: number
@@ -67,30 +67,30 @@ export interface InternalGains {
 
 export interface VentilationInput {
   method: VentilationMethod
-  perPersonLs: number // L/s·pessoa (NBR 16401-3)
-  perAreaLsM2: number // L/s·m²
-  achOutdoor: number // renovações/h de ar externo (método ach)
+  perPersonLs: number // L/s per person (NBR 16401-3)
+  perAreaLsM2: number // L/s per m²
+  achOutdoor: number // outdoor air changes per hour ('ach' method)
   manualM3h: number
-  heatRecovery: number // 0–0,8 eficácia do recuperador (0 = sem)
+  heatRecovery: number // 0–0.8 heat recovery effectiveness (0 = none)
   infiltrationACH: number
 }
 
 export interface Operation {
   hoursPerDay: number
   safetyFactor: number // %
-  fanHeatPct: number // % da carga sensível do ambiente
-  supplyDeltaT: number // K (T_ambiente − T_insuflamento)
+  fanHeatPct: number // % of room sensible load
+  supplyDeltaT: number // K, room minus supply air temperature
 }
 
 export interface EquipmentInput {
   system: HvacSystem
   refrigerant: string
-  copOverride: number | null // kW_frio/kW_el (nominal do sistema)
-  nUnits: number | null // null = sugerido
+  copOverride: number | null // kW cooling / kW_el, system nominal
+  nUnits: number | null // null = suggested
   standby: boolean
-  chwSupply: number // °C água gelada (chillers)
+  chwSupply: number // °C, chilled water supply (chillers)
   chwDeltaT: number // K
-  condApproach: number // K (condensação − ar externo | − bulbo úmido)
+  condApproach: number // K, condensing temperature above outdoor dry bulb (air-cooled) or wet bulb (water-cooled)
   compressorType: CompressorType
   superheat: number
   subcooling: number
@@ -117,7 +117,7 @@ export interface Scenario {
   equipment: EquipmentInput
 }
 
-// ---------- Resultados ----------
+// results
 
 export interface Warning {
   key: string

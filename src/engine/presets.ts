@@ -1,4 +1,4 @@
-// Modelos prontos: ambientes, cidades (condições de projeto), paredes, vidros, atividades. Todos editáveis.
+// Built-in templates for space types, city design conditions, walls, glazing and activities. Every value is an editable starting point.
 import type { ActivityId, EnvironmentId, HvacSystem, Orientation, Scenario, Wall } from './types'
 
 export function uid(): string {
@@ -14,7 +14,7 @@ export interface CityPreset {
   dailyRange: number
 }
 
-// Condições de verão de projeto (≈ 1 % anual; NBR 16401-1 Anexo A / ASHRAE), arredondadas.
+// Summer design conditions (≈ 1 % annual, NBR 16401-1 Annex A / ASHRAE), rounded.
 export const CITIES: CityPreset[] = [
   { id: 'sao_paulo', name: 'São Paulo (SP)', tExt: 32, twb: 21.5, altitude: 800, dailyRange: 10 },
   { id: 'rio', name: 'Rio de Janeiro (RJ)', tExt: 35, twb: 26, altitude: 10, dailyRange: 8 },
@@ -84,7 +84,7 @@ export const SHADING_PRESETS: { id: string; nameKey: string; factor: number }[] 
   { id: 'external', nameKey: 'shade.external', factor: 0.35 },
 ]
 
-/** Calor por pessoa (W sensível / latente) a ~24 °C, ASHRAE Fundamentals cap. 18 (valores ajustados). */
+/** Heat gain per person (sensible / latent W) at ~24 °C, ASHRAE Fundamentals ch. 18 (adjusted values). */
 export const ACTIVITIES: Record<ActivityId, { sensible: number; latent: number }> = {
   seated_quiet: { sensible: 65, latent: 30 },
   sleeping: { sensible: 60, latent: 30 },
@@ -99,10 +99,10 @@ export const ACTIVITIES: Record<ActivityId, { sensible: number; latent: number }
 
 export const ORIENTATIONS: Orientation[] = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 
-/** CLTD de pico para paredes de massa média (K), hemisfério sul (fachada norte ensolarada). ASHRAE simplificado. */
+/** Peak CLTD (K) for medium-mass walls in the southern hemisphere, where the north facade gets the sun. Simplified from ASHRAE. */
 export const WALL_CLTD: Record<Orientation, number> = { N: 14, NE: 16, E: 18, SE: 12, S: 8, SW: 12, W: 20, NW: 18 }
 export const ROOF_CLTD = 24
-/** Fator máximo de ganho solar por vidro (W/m²) ≈ latitude 20–25 °S, verão. */
+/** Maximum solar heat gain factor through glass (W/m²), around latitude 20–25° S in summer. */
 export const SHGF: Record<Orientation, number> = { N: 250, NE: 420, E: 530, SE: 400, S: 110, SW: 400, W: 530, NW: 420 }
 
 export const ENVIRONMENTS: EnvironmentId[] = ['office', 'meeting_room', 'classroom', 'gym', 'residence', 'retail', 'restaurant', 'hotel_room', 'hospital_room', 'auditorium', 'server_room', 'custom']

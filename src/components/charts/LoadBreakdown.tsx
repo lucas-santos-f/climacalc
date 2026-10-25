@@ -18,13 +18,13 @@ export function LoadDonut({ load }: { load: LoadResult }) {
       animation: false,
       tooltip: { trigger: 'item', formatter: (p: { name: string; value: number; percent: number }) => `${p.name}: ${p.value.toLocaleString()} W (${p.percent.toFixed(0)} %)` },
       legend: { bottom: 0, textStyle: { color: c.text, fontSize: 11 } },
-      series: [{ type: 'pie', radius: ['42%', '70%'], center: ['50%', '42%'], data, label: { formatter: '{d}%', color: c.text, fontSize: 11 }, itemStyle: { borderColor: c.surface, borderWidth: 2 } }],
+      series: [{ type: 'pie', radius: ['45%', '74%'], center: ['50%', '44%'], data, label: { position: 'inside', formatter: (p: { percent: number }) => (p.percent >= 6 ? `${Math.round(p.percent)} %` : ''), color: '#fff', fontSize: 11, fontWeight: 600 }, labelLine: { show: false }, itemStyle: { borderColor: c.surface, borderWidth: 2 } }],
     }
   }, [load, t, theme])
   return <EChart option={option} className="chart" />
 }
 
-/** Barras empilhadas sensível / latente por parcela. */
+// Stacked sensible/latent bars per load item.
 export function LoadBars({ load }: { load: LoadResult }) {
   const t = useT()
   const theme = useTheme()
@@ -38,7 +38,7 @@ export function LoadBars({ load }: { load: LoadResult }) {
       grid: { left: 8, right: 70, top: 28, bottom: 8, containLabel: true },
       legend: { top: 0, textStyle: { color: c.text, fontSize: 11 } },
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (v: number) => `${u.n(v, 0)} W` },
-      xAxis: { type: 'value', name: 'W', axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.grid, opacity: 0.5 } } },
+      xAxis: { type: 'value', name: 'W', axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.grid, type: 'dashed' } } },
       yAxis: { type: 'category', data: names, axisLabel: { color: c.text, fontSize: 11, width: 150, overflow: 'truncate' }, axisLine: { lineStyle: { color: c.grid } } },
       series: [
         { type: 'bar', name: t('load.sensible'), stack: 'x', data: items.map((i) => ({ value: Math.round(i.sensible), itemStyle: { color: GROUP_COLOR[i.group] } })), barMaxWidth: 20 },
@@ -47,9 +47,5 @@ export function LoadBars({ load }: { load: LoadResult }) {
     }
   }, [load, t, theme, u])
   const h = Math.max(240, 26 * load.items.length + 60)
-  return (
-    <div style={{ height: h }}>
-      <EChart option={option} className="chart" />
-    </div>
-  )
+  return <EChart option={option} height={h} />
 }

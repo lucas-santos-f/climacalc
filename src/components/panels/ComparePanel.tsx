@@ -7,10 +7,12 @@ import type { CycleInput, Scenario } from '../../engine/types'
 import { REFRIGERANTS } from '../../engine/refrigerants'
 import { computeCycle } from '../../engine/cycle'
 import { SYSTEM_PRESETS, cycleInputFor } from '../../engine/equipment'
+import { fluidName } from '../../labels'
 
 const K0 = 273.15
 const ALL_IDS = REFRIGERANTS.map((r) => r.id)
 
+// CO2 only makes sense transcritical once condensing gets warm
 function adaptInput(base: CycleInput, id: string): CycleInput {
   const inp: CycleInput = { ...base, refrigerant: id }
   if (id === 'R744' && base.tCond > 22) return { ...inp, system: 'transcritical', transcritical: { tGasCoolerOut: base.tCond - 5, pGasCooler: null } }
@@ -30,7 +32,7 @@ export function ComparePanel({ sc, computed }: { sc: Scenario; computed: Compute
     const base = cycleInputFor(sc, preset)
     return REFRIGERANTS.map((meta) => {
       const input = adaptInput(base, meta.id)
-      const common = { id: meta.id, name: meta.name, color: meta.color, safety: meta.safety, gwp: meta.gwpAR4, typical: preset.refrigerants.includes(meta.id) }
+      const common = { id: meta.id, name: fluidName(meta, t), color: meta.color, safety: meta.safety, gwp: meta.gwpAR4, typical: preset.refrigerants.includes(meta.id) }
       try {
         const r = computeCycle(input, Q, { main: fluids[meta.id] })
         return { ...common, ok: true, cop: r.COP, W: r.Wtotal, Tdis: Math.max(...r.stages.map((s) => s.Tdischarge)) - K0, Vdisp: r.stages.reduce((a, s) => a + s.Vdisplacement, 0) }
@@ -38,7 +40,7 @@ export function ComparePanel({ sc, computed }: { sc: Scenario; computed: Compute
         return { ...common, ok: false, cop: 0, W: 0, Tdis: 0, Vdisp: 0 }
       }
     })
-  }, [fluids, sc, preset, Q])
+  }, [fluids, sc, preset, Q, t])
 
   const scenarioRows = useMemo(() => {
     if (!fluids) return []
@@ -46,8 +48,8 @@ export function ComparePanel({ sc, computed }: { sc: Scenario; computed: Compute
   }, [scenarios, fluids])
 
   return (
-    <div className="grid">
-      <Card title={t('cmp.refrigerants')} hint={t('cmp.hint')} className="span-2">
+    <div className="stack">
+      <Card title={t('cmp.refrigerants')} hint={t('cmp.hint')}>
         {!fluids && !error && <div className="alert info">{t('cmp.loading')}</div>}
         {error && <div className="alert error">{error}</div>}
         {rows.length > 0 && (
@@ -61,7 +63,7 @@ export function ComparePanel({ sc, computed }: { sc: Scenario; computed: Compute
           </div>
         )}
         {rows.length > 0 && (
-          <div className="table-wrap" style={{ marginTop: 10 }}>
+          <div className="table-wrap" style={{ marginTop: 16 }}>
             <table className="kv">
               <thead>
                 <tr>
@@ -79,7 +81,7 @@ export function ComparePanel({ sc, computed }: { sc: Scenario; computed: Compute
                   .slice()
                   .sort((a, b) => Number(b.ok) - Number(a.ok) || Number(b.typical) - Number(a.typical) || b.cop - a.cop)
                   .map((r) => (
-                    <tr key={r.id} style={{ fontWeight: r.id === sc.equipment.refrigerant ? 700 : undefined, opacity: r.typical ? 1 : 0.65 }}>
+                    <tr key={r.id} className={r.id === sc.equipment.refrigerant ? 'current' : r.typical && r.ok ? undefined : 'dim'}>
                       <td>
                         {r.typical ? '★ ' : ''}
                         {r.name}
@@ -100,10 +102,10 @@ export function ComparePanel({ sc, computed }: { sc: Scenario; computed: Compute
         )}
       </Card>
 
-      <Card title={t('cmp.scenarios')} className="span-2">
-        {scenarioRows.length < 2 && <div className="alert info">{t('cmp.no_scenarios')}</div>}
+      <Card title={t('cmp.scenarios')}>
+        {scenarioRows.length < 2 && <div className="empty">{t('cmp.no_scenarios')}</div>}
         {scenarioRows.length > 0 && (
-          <div className="table-wrap">
+          <div className="table-wrap" style={scenarioRows.length < 2 ? { marginTop: 12 } : undefined}>
             <table className="kv">
               <thead>
                 <tr>
@@ -123,7 +125,7 @@ export function ComparePanel({ sc, computed }: { sc: Scenario; computed: Compute
               </thead>
               <tbody>
                 {scenarioRows.map(({ sc: s, c }) => (
-                  <tr key={s.id} style={{ fontWeight: s.id === sc.id ? 700 : undefined }}>
+                  <tr key={s.id} className={s.id === sc.id ? 'current' : undefined}>
                     <td>{s.name}</td>
                     <td>{t(`environment.${s.environment}`)}</td>
                     <td className="num">{u.n(c.load.geometry.floorArea, 0)}</td>

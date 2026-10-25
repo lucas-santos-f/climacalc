@@ -4,13 +4,13 @@ import { createScenario } from '../presets'
 import { computeEquipment, cycleInputFor, SYSTEM_PRESETS } from '../equipment'
 import { loadFluid } from '../props'
 
-describe('carga térmica de climatização', () => {
-  it('pressão pela altitude', () => {
+describe('air-conditioning load', () => {
+  it('pressure at altitude', () => {
     expect(pressureAtAltitude(0)).toBeCloseTo(101.325, 3)
     expect(pressureAtAltitude(800)).toBeCloseTo(92.08, 0)
   })
 
-  it('escritório 200 m² em São Paulo: 80–180 W/m², SHR plausível', () => {
+  it('200 m² office in São Paulo: 80–180 W/m² and a plausible SHR', () => {
     const sc = createScenario('office', 't')
     const r = computeLoad(sc)
     expect(r.geometry.floorArea).toBe(200)
@@ -25,14 +25,14 @@ describe('carga térmica de climatização', () => {
     expect(sumS + sumL).toBeCloseTo(r.coilTotal, 3)
   })
 
-  it('academia tem carga latente alta e SHR menor que escritório', () => {
+  it('gym has a high latent load and a lower SHR than an office', () => {
     const gym = computeLoad(createScenario('gym', 'g'))
     const office = computeLoad(createScenario('office', 'o'))
     expect(gym.shrRoom).toBeLessThan(office.shrRoom)
     expect(gym.roomLatent / gym.roomTotal).toBeGreaterThan(0.2)
   })
 
-  it('psicrometria do insuflamento: vazão, mistura e ADP consistentes', () => {
+  it('supply air psychrometrics: airflow, mixing and ADP agree', () => {
     const r = computeLoad(createScenario('office', 't'))
     const a = r.air
     expect(a.supplyM3h).toBeGreaterThan(0)
@@ -47,18 +47,18 @@ describe('carga térmica de climatização', () => {
     expect(a.adp!).toBeLessThan(a.tSupply)
     expect(a.bypassFactor!).toBeGreaterThanOrEqual(0)
     expect(a.bypassFactor!).toBeLessThan(0.5)
-    // carga na serpentina ≈ ambiente + ar externo (sem fator de segurança), tolerância 8 %
+    // coil load ≈ room + outdoor air (no safety factor), within 8 %
     expect(Math.abs(a.coilKW * 1000 / r.coilTotal - 1)).toBeLessThan(0.08)
   })
 
-  it('sala de servidores: só equipamento, SHR ≈ 1', () => {
+  it('server room: equipment only, SHR ≈ 1', () => {
     const r = computeLoad(createScenario('server_room', 's'))
     expect(r.people).toBe(0)
     expect(r.shrRoom).toBeGreaterThan(0.97)
     expect(r.byGroup.equipment.sensible).toBeCloseTo(15000, 0)
   })
 
-  it('seleção de equipamento: VRF e chiller', async () => {
+  it('equipment selection: VRF and chiller', async () => {
     const sc = createScenario('office', 't')
     const load = computeLoad(sc)
     const f = await loadFluid('R32')

@@ -6,9 +6,9 @@ import { useT, useTheme, useUnits } from '../../hooks'
 import { wFromRh, wSat } from '../../engine/psychro'
 import { toDisplay, unitLabel } from '../../units'
 
-const STATE_COLOR: Record<string, string> = { OA: '#dc2626', RA: '#15803d', MA: '#d97706', SA: '#0b3d91', ADP: '#7c3aed' }
+const STATE_COLOR: Record<string, string> = { OA: '#dc2626', RA: '#15803d', MA: '#d97706', SA: '#2563eb', ADP: '#7c3aed' }
 
-/** Carta psicrométrica (T bulbo seco × umidade absoluta) com o processo de mistura e resfriamento. */
+// Psychrometric chart (dry-bulb vs humidity ratio) with the mixing and cooling process drawn on it.
 export function PsychroChart({ air, P }: { air: AirResult; P: number }) {
   const t = useT()
   const theme = useTheme()
@@ -52,7 +52,7 @@ export function PsychroChart({ air, P }: { air: AirResult; P: number }) {
       if (pa && pb) lines.push({ type: 'line', name: `${a}-${b}`, data: [pa, pb], symbol: 'none', silent: true, tooltip: { show: false }, lineStyle: { color, width: 2, type: dashed ? 'dashed' : 'solid' }, z: 3 })
     }
     seg('OA', 'RA', c.muted, true)
-    seg('MA', 'SA', '#0b3d91')
+    seg('MA', 'SA', '#2563eb')
     seg('SA', 'ADP', '#7c3aed', true)
     seg('SA', 'RA', '#15803d')
     const points = air.states.map((s) => ({ name: s.id, value: [tx(s.T), Math.round(s.W * 100000) / 100], RH: s.RH, h: s.h, Twb: s.Twb, itemStyle: { color: STATE_COLOR[s.id] ?? c.primary, borderColor: c.surface, borderWidth: 1.5 } }))
@@ -61,10 +61,10 @@ export function PsychroChart({ air, P }: { air: AirResult; P: number }) {
       grid: { left: 52, right: 60, top: 18, bottom: 44 },
       tooltip: {
         trigger: 'item',
-        formatter: (p: { data: { name: string; value: number[]; RH: number; h: number; Twb: number } }) => (p.data?.name ? `<b>${t(`air.state.${p.data.name}`)}</b><br/>T = ${p.data.value[0]} ${unitLabel('temp', sys)} · W = ${p.data.value[1]} g/kg<br/>UR = ${(p.data.RH * 100).toFixed(0)} % · h = ${p.data.h.toFixed(1)} kJ/kg · Tbu = ${p.data.Twb.toFixed(1)} °C` : ''),
+        formatter: (p: { data: { name: string; value: number[]; RH: number; h: number; Twb: number } }) => (p.data?.name ? `<b>${t(`air.state.${p.data.name}`)}</b><br/>T = ${p.data.value[0]} ${unitLabel('temp', sys)} · W = ${p.data.value[1]} g/kg<br/>${t('air.RH')} = ${(p.data.RH * 100).toFixed(0)} % · h = ${toDisplay('enthalpy', p.data.h, sys).toFixed(1)} ${unitLabel('enthalpy', sys)} · ${t('air.Twb')} = ${tx(p.data.Twb)} ${unitLabel('temp', sys)}` : ''),
       },
-      xAxis: { type: 'value', name: `${t('air.chart_x')} (${unitLabel('temp', sys)})`, nameLocation: 'middle', nameGap: 26, min: tx(Tmin), max: tx(Tmax), axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.grid, opacity: 0.5 } } },
-      yAxis: { type: 'value', name: `${t('air.chart_y')} (g/kg)`, position: 'right', min: 0, max: Wmax, axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.grid, opacity: 0.5 } } },
+      xAxis: { type: 'value', name: `${t('air.chart_x')} (${unitLabel('temp', sys)})`, nameLocation: 'middle', nameGap: 26, min: tx(Tmin), max: tx(Tmax), axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.grid, type: 'dashed' } } },
+      yAxis: { type: 'value', name: `${t('air.chart_y')} (g/kg)`, position: 'right', min: 0, max: Wmax, axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.grid, type: 'dashed' } } },
       series: [...rhSeries, ...lines, { type: 'scatter', name: 'states', data: points, symbolSize: 12, label: { show: true, formatter: (p: { data: { name: string } }) => p.data.name, position: 'top', color: c.text, fontWeight: 'bold', fontSize: 11 }, z: 5 }],
     }
   }, [air, P, t, theme, sys])
