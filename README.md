@@ -6,13 +6,17 @@ It shares the thermodynamic engine of [FrigoCalc](https://frigocalc.frioeclima.w
 
 **Live:** https://climacalc.frioeclima.workers.dev
 
+![Space and load tab with the result panel](docs/screenshot-load.png)
+
+![Psychrometric chart with outdoor, return, mixed, supply and ADP points](docs/screenshot-psychrometric-chart.png)
+
 Everything runs in the browser. Nothing is sent to a server: scenarios stay in the device's local storage and can be exported as JSON or CSV, printed to PDF or shared as a link.
 
 ## What it calculates
 
 | Tab | Contents |
 | --- | --- |
-| **Room & load** | Site and design conditions (15 Brazilian cities or your own), room geometry, walls and glazing by orientation (U value, mass, color, SHGC, shading), roof and floor, occupancy by activity, lighting, equipment, outdoor air (NBR 16401-3), infiltration, fan heat and safety factor. Results in kW, TR and BTU/h with the sensible and latent split, SHR, W/m², m²/TR, charts and an itemized table. |
+| **Space & load** | Site and design conditions (15 Brazilian cities or your own), room geometry, walls and glazing by orientation (U value, mass, color, SHGC, shading), roof and floor, occupancy by activity, lighting, equipment, outdoor air (NBR 16401-3), infiltration, fan heat and safety factor. Results in kW, TR and BTU/h with the sensible and latent split, SHR, W/m², m²/TR, charts and an itemized table. |
 | **Air & psychrometrics** | Supply airflow, air changes per hour, outdoor air fraction, supply air state, mixing, apparatus dew point (ADP) and bypass factor, and an interactive psychrometric chart with the OA, RA, MA, SA and ADP points. |
 | **Equipment** | Split, VRF, rooftop, air-cooled or water-cooled chiller: standard sizes, N or N+1 units, nominal COP next to the real cycle COP (CoolProp), electrical demand (compressors, fans, pumps, cooling tower, kVA, current, transformer), chilled, condenser and make-up water, refrigerant charge, CO₂ equivalent, A2L/A3 room charge limit (IEC 60335-2-40), emergency ventilation and plant room areas. Also the p–h diagram and the load sensitivity to outdoor temperature and setpoint. |
 | **Compare** | COP, GWP, power, discharge temperature and displacement of 23 fluids under the system's conditions, plus a side-by-side table of all saved scenarios. |
