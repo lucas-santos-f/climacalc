@@ -8,6 +8,7 @@ import { SYSTEM_PRESETS } from '../../engine/equipment'
 import { REFRIGERANTS, refrigerantMeta } from '../../engine/refrigerants'
 import { computeLoad } from '../../engine/hvac'
 import { PhDiagram } from '../charts/PhDiagram'
+import { CycleSchematic } from '../charts/CycleSchematic'
 import { LoadSensitivity, type SweepPoint } from '../charts/Sensitivity'
 import { fluidName } from '../../labels'
 
@@ -66,7 +67,7 @@ export function EquipmentPanel({ sc, computed }: { sc: Scenario; computed: Compu
           <Card title={t('eq.title')}>
             <div className="fields">
               <SelectField
-                label={t('eq.system')}
+                label={t('eq.system')} help={t('help.eq.system')}
                 value={sc.equipment.system}
                 onChange={(v) =>
                   update((d) => {
@@ -79,23 +80,23 @@ export function EquipmentPanel({ sc, computed }: { sc: Scenario; computed: Compu
                 }
                 options={SYSTEMS.map((s) => ({ value: s, label: t(`eq.system.${s}`) }))}
               />
-              <SelectField label={t('eq.refrigerant')} value={sc.equipment.refrigerant} onChange={(v) => update((d) => (d.equipment.refrigerant = v))} options={refOptions} />
-              <NumberField label={`${t('eq.copOverride')} (${t(`eq.cop_basis.${sc.equipment.system}`)})`} value={sc.equipment.copOverride} onChange={(v) => update((d) => (d.equipment.copOverride = v))} unit="kW/kW" nullable autoHint={u.n(preset.cop, 2)} min={1} max={12} />
-              <NumberField label={t('eq.nUnits')} value={sc.equipment.nUnits} onChange={(v) => update((d) => (d.equipment.nUnits = v))} unit="" nullable autoHint={String(E.units.operating)} min={1} max={200} digits={0} />
-              <CheckField label={t('eq.standby')} checked={sc.equipment.standby} onChange={(v) => update((d) => (d.equipment.standby = v))} />
+              <SelectField label={t('eq.refrigerant')} help={t('help.eq.refrigerant')} value={sc.equipment.refrigerant} onChange={(v) => update((d) => (d.equipment.refrigerant = v))} options={refOptions} />
+              <NumberField label={`${t('eq.copOverride')} (${t(`eq.cop_basis.${sc.equipment.system}`)})`} help={t('help.eq.copOverride')} value={sc.equipment.copOverride} onChange={(v) => update((d) => (d.equipment.copOverride = v))} unit="kW/kW" nullable autoHint={u.n(preset.cop, 2)} min={1} max={12} />
+              <NumberField label={t('eq.nUnits')} help={t('help.eq.nUnits')} value={sc.equipment.nUnits} onChange={(v) => update((d) => (d.equipment.nUnits = v))} unit="" nullable autoHint={String(E.units.operating)} min={1} max={200} digits={0} />
+              <CheckField label={t('eq.standby')} help={t('help.eq.standby')} checked={sc.equipment.standby} onChange={(v) => update((d) => (d.equipment.standby = v))} />
               {isChiller && (
                 <>
-                  <NumberField label={t('eq.chwSupply')} value={sc.equipment.chwSupply} onChange={(v) => update((d) => (d.equipment.chwSupply = v ?? 7))} quantity="temp" min={2} max={20} digits={1} />
-                  <NumberField label={t('eq.chwDeltaT')} value={sc.equipment.chwDeltaT} onChange={(v) => update((d) => (d.equipment.chwDeltaT = v ?? 5.6))} quantity="dtemp" min={2} max={12} digits={1} />
+                  <NumberField label={t('eq.chwSupply')} help={t('help.eq.chwSupply')} value={sc.equipment.chwSupply} onChange={(v) => update((d) => (d.equipment.chwSupply = v ?? 7))} quantity="temp" min={2} max={20} digits={1} />
+                  <NumberField label={t('eq.chwDeltaT')} help={t('help.eq.chwDeltaT')} value={sc.equipment.chwDeltaT} onChange={(v) => update((d) => (d.equipment.chwDeltaT = v ?? 5.6))} quantity="dtemp" min={2} max={12} digits={1} />
                 </>
               )}
-              <NumberField label={t('eq.condApproach')} value={sc.equipment.condApproach} onChange={(v) => update((d) => (d.equipment.condApproach = v ?? 12))} quantity="dtemp" min={3} max={30} digits={1} />
-              <SelectField label={t('eq.compressorType')} value={sc.equipment.compressorType} onChange={(v) => update((d) => (d.equipment.compressorType = v as CompressorType))} options={COMPRESSORS.map((c) => ({ value: c, label: t(`comp.${c}`) }))} />
-              <NumberField label={t('eq.superheat')} value={sc.equipment.superheat} onChange={(v) => update((d) => (d.equipment.superheat = v ?? 5))} quantity="dtemp" min={0} max={30} digits={1} />
-              <NumberField label={t('eq.subcooling')} value={sc.equipment.subcooling} onChange={(v) => update((d) => (d.equipment.subcooling = v ?? 3))} quantity="dtemp" min={0} max={30} digits={1} />
-              <NumberField label={t('eq.powerFactor')} value={sc.equipment.powerFactor} onChange={(v) => update((d) => (d.equipment.powerFactor = v ?? 0.92))} unit="—" min={0.6} max={1} />
-              <NumberField label={t('eq.voltage')} value={sc.equipment.voltage} onChange={(v) => update((d) => (d.equipment.voltage = v ?? 380))} unit="V" min={100} max={15000} digits={0} />
-              <NumberField label={t('eq.chargeKgPerKW')} value={sc.equipment.chargeKgPerKW} onChange={(v) => update((d) => (d.equipment.chargeKgPerKW = v))} quantity="kgperkw" nullable autoHint={u.val('kgperkw', preset.chargeKgPerKW, 2)} min={0} max={10} />
+              <NumberField label={t('eq.condApproach')} help={t('help.eq.condApproach')} value={sc.equipment.condApproach} onChange={(v) => update((d) => (d.equipment.condApproach = v ?? 12))} quantity="dtemp" min={3} max={30} digits={1} />
+              <SelectField label={t('eq.compressorType')} help={t('help.eq.compressorType')} value={sc.equipment.compressorType} onChange={(v) => update((d) => (d.equipment.compressorType = v as CompressorType))} options={COMPRESSORS.map((c) => ({ value: c, label: t(`comp.${c}`) }))} />
+              <NumberField label={t('eq.superheat')} help={t('help.eq.superheat')} value={sc.equipment.superheat} onChange={(v) => update((d) => (d.equipment.superheat = v ?? 5))} quantity="dtemp" min={0} max={30} digits={1} />
+              <NumberField label={t('eq.subcooling')} help={t('help.eq.subcooling')} value={sc.equipment.subcooling} onChange={(v) => update((d) => (d.equipment.subcooling = v ?? 3))} quantity="dtemp" min={0} max={30} digits={1} />
+              <NumberField label={t('eq.powerFactor')} help={t('help.eq.powerFactor')} value={sc.equipment.powerFactor} onChange={(v) => update((d) => (d.equipment.powerFactor = v ?? 0.92))} unit="—" min={0.6} max={1} />
+              <NumberField label={t('eq.voltage')} help={t('help.eq.voltage')} value={sc.equipment.voltage} onChange={(v) => update((d) => (d.equipment.voltage = v ?? 380))} unit="V" min={100} max={15000} digits={0} />
+              <NumberField label={t('eq.chargeKgPerKW')} help={t('help.eq.chargeKgPerKW')} value={sc.equipment.chargeKgPerKW} onChange={(v) => update((d) => (d.equipment.chargeKgPerKW = v))} quantity="kgperkw" nullable autoHint={u.val('kgperkw', preset.chargeKgPerKW, 2)} min={0} max={10} />
             </div>
           </Card>
 
@@ -160,6 +161,12 @@ export function EquipmentPanel({ sc, computed }: { sc: Scenario; computed: Compu
             )}
             <p className="note">{t('eq.norms')}</p>
           </Card>
+
+          {cycle && cycle.points.length === 4 && !cycle.ht && (
+            <Card title={t('sch.title')} hint={t('sch.hint')}>
+              <CycleSchematic cycle={cycle} />
+            </Card>
+          )}
         </div>
 
         <aside className="aside">

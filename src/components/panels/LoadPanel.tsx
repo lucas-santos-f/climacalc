@@ -33,11 +33,11 @@ function WallEditor({ w, idx, sc }: { w: Wall; idx: number; sc: Scenario }) {
         </button>
       </header>
       <div className="fields">
-        <SelectField label={t('wall.orientation')} value={w.orientation} onChange={(v) => set({ orientation: v as Orientation })} options={ORIENTATIONS.map((o) => ({ value: o, label: o }))} />
-        <CheckField label={t('wall.exposed')} checked={w.exposed} onChange={(v) => set({ exposed: v })} />
-        <NumberField label={t('wall.area')} value={w.areaOverride} onChange={(v) => set({ areaOverride: v })} quantity="area" nullable autoHint={u.val('area', autoArea, 1)} min={0} max={50000} />
+        <SelectField label={t('wall.orientation')} help={t('help.wall.orientation')} value={w.orientation} onChange={(v) => set({ orientation: v as Orientation })} options={ORIENTATIONS.map((o) => ({ value: o, label: o }))} />
+        <CheckField label={t('wall.exposed')} help={t('help.wall.exposed')} checked={w.exposed} onChange={(v) => set({ exposed: v })} />
+        <NumberField label={t('wall.area')} help={t('help.wall.area')} value={w.areaOverride} onChange={(v) => set({ areaOverride: v })} quantity="area" nullable autoHint={u.val('area', autoArea, 1)} min={0} max={50000} />
         <SelectField
-          label={t('wall.preset')}
+          label={t('wall.preset')} help={t('help.wall.preset')}
           value={wallPreset}
           onChange={(id) => {
             const p = WALL_PRESETS.find((x) => x.id === id)
@@ -45,14 +45,14 @@ function WallEditor({ w, idx, sc }: { w: Wall; idx: number; sc: Scenario }) {
           }}
           options={[...WALL_PRESETS.map((p) => ({ value: p.id, label: t(p.nameKey) })), { value: 'custom', label: '—' }]}
         />
-        <NumberField label={t('wall.uValue')} value={w.uValue} onChange={(v) => set({ uValue: v ?? w.uValue })} quantity="uvalue" min={0.05} max={10} />
-        <SelectField label={t('wall.mass')} value={w.mass} onChange={(v) => set({ mass: v as MassClass })} options={MASSES.map((m) => ({ value: m, label: t(`mass.${m}`) }))} />
-        <SelectField label={t('wall.color')} value={w.color} onChange={(v) => set({ color: v as SurfaceColor })} options={COLORS.map((c) => ({ value: c, label: t(`color.${c}`) }))} />
+        <NumberField label={t('wall.uValue')} help={t('help.wall.uValue')} value={w.uValue} onChange={(v) => set({ uValue: v ?? w.uValue })} quantity="uvalue" min={0.05} max={10} />
+        <SelectField label={t('wall.mass')} help={t('help.wall.mass')} value={w.mass} onChange={(v) => set({ mass: v as MassClass })} options={MASSES.map((m) => ({ value: m, label: t(`mass.${m}`) }))} />
+        <SelectField label={t('wall.color')} help={t('help.wall.color')} value={w.color} onChange={(v) => set({ color: v as SurfaceColor })} options={COLORS.map((c) => ({ value: c, label: t(`color.${c}`) }))} />
         {w.exposed && (
           <>
-            <NumberField label={t('wall.glassArea')} value={w.glassArea} onChange={(v) => set({ glassArea: v ?? 0 })} quantity="area" min={0} max={50000} />
+            <NumberField label={t('wall.glassArea')} help={t('help.wall.glassArea')} value={w.glassArea} onChange={(v) => set({ glassArea: v ?? 0 })} quantity="area" min={0} max={50000} />
             <SelectField
-              label={t('wall.glassPreset')}
+              label={t('wall.glassPreset')} help={t('help.wall.glassPreset')}
               value={glassPreset}
               onChange={(id) => {
                 const p = GLASS_PRESETS.find((x) => x.id === id)
@@ -60,10 +60,10 @@ function WallEditor({ w, idx, sc }: { w: Wall; idx: number; sc: Scenario }) {
               }}
               options={[...GLASS_PRESETS.map((p) => ({ value: p.id, label: t(p.nameKey) })), { value: 'custom', label: '—' }]}
             />
-            <NumberField label={t('wall.glassU')} value={w.glassU} onChange={(v) => set({ glassU: v ?? w.glassU })} quantity="uvalue" min={0.3} max={8} />
-            <NumberField label={t('wall.glassShgc')} value={w.glassShgc} onChange={(v) => set({ glassShgc: v ?? w.glassShgc })} unit="—" min={0} max={1} />
+            <NumberField label={t('wall.glassU')} help={t('help.wall.glassU')} value={w.glassU} onChange={(v) => set({ glassU: v ?? w.glassU })} quantity="uvalue" min={0.3} max={8} />
+            <NumberField label={t('wall.glassShgc')} help={t('help.wall.glassShgc')} value={w.glassShgc} onChange={(v) => set({ glassShgc: v ?? w.glassShgc })} unit="—" min={0} max={1} />
             <SelectField
-              label={t('wall.shadePreset')}
+              label={t('wall.shadePreset')} help={t('help.wall.shadePreset')}
               value={shadePreset}
               onChange={(id) => {
                 const p = SHADING_PRESETS.find((x) => x.id === id)
@@ -71,7 +71,7 @@ function WallEditor({ w, idx, sc }: { w: Wall; idx: number; sc: Scenario }) {
               }}
               options={[...SHADING_PRESETS.map((p) => ({ value: p.id, label: t(p.nameKey) })), { value: 'custom', label: '—' }]}
             />
-            <NumberField label={t('wall.shading')} value={w.shading} onChange={(v) => set({ shading: v ?? w.shading })} unit="—" min={0} max={1} />
+            <NumberField label={t('wall.shading')} help={t('help.wall.shading')} value={w.shading} onChange={(v) => set({ shading: v ?? w.shading })} unit="—" min={0} max={1} />
           </>
         )}
       </div>
@@ -84,6 +84,7 @@ export function LoadPanel({ sc, computed }: { sc: Scenario; computed: Computed }
   const u = useUnits()
   const update = useStore((s) => s.update)
   const L = computed.load
+  const oa = L.air.states.find((s) => s.id === 'OA')
   const roofPreset = ROOF_PRESETS.find((p) => Math.abs(p.u - sc.roof.uValue) < 1e-6 && p.mass === sc.roof.mass)?.id ?? 'custom'
 
   return (
@@ -93,7 +94,7 @@ export function LoadPanel({ sc, computed }: { sc: Scenario; computed: Computed }
           <Card title={t('site.title')} hint={t('site.hint')}>
             <div className="fields">
               <SelectField
-                label={t('site.city')}
+                label={t('site.city')} help={t('help.site.city')}
                 value={sc.site.city}
                 onChange={(id) => {
                   const c = CITIES.find((x) => x.id === id)
@@ -101,20 +102,21 @@ export function LoadPanel({ sc, computed }: { sc: Scenario; computed: Computed }
                 }}
                 options={CITIES.map((c) => ({ value: c.id, label: c.name }))}
               />
-              <NumberField label={t('site.tExt')} value={sc.site.tExt} onChange={(v) => update((d) => ((d.site.tExt = v ?? d.site.tExt), (d.site.city = 'custom')))} quantity="temp" min={-20} max={55} digits={1} />
-              <NumberField label={t('site.twbExt')} value={sc.site.twbExt} onChange={(v) => update((d) => ((d.site.twbExt = Math.min(v ?? d.site.twbExt, d.site.tExt)), (d.site.city = 'custom')))} quantity="temp" min={-25} max={40} digits={1} />
-              <NumberField label={t('site.dailyRange')} value={sc.site.dailyRange} onChange={(v) => update((d) => (d.site.dailyRange = v ?? d.site.dailyRange))} quantity="dtemp" min={0} max={30} digits={1} />
-              <NumberField label={t('site.altitude')} value={sc.site.altitude} onChange={(v) => update((d) => (d.site.altitude = v ?? d.site.altitude))} quantity="length" min={-500} max={6000} digits={0} />
-              <NumberField label={t('site.tInt')} value={sc.site.tInt} onChange={(v) => update((d) => (d.site.tInt = v ?? d.site.tInt))} quantity="temp" min={10} max={35} digits={1} />
-              <NumberField label={t('site.rhInt')} value={sc.site.rhInt} onChange={(v) => update((d) => (d.site.rhInt = v ?? d.site.rhInt))} unit="%" min={10} max={90} digits={0} />
+              <NumberField label={t('site.tExt')} help={t('help.site.tExt')} value={sc.site.tExt} onChange={(v) => update((d) => ((d.site.tExt = v ?? d.site.tExt), (d.site.city = 'custom')))} quantity="temp" min={-20} max={55} digits={1} />
+              <NumberField label={t('site.twbExt')} help={t('help.site.twbExt')} value={sc.site.twbExt} onChange={(v) => update((d) => ((d.site.twbExt = Math.min(v ?? d.site.twbExt, d.site.tExt)), (d.site.city = 'custom')))} quantity="temp" min={-25} max={40} digits={1} />
+              <NumberField label={t('site.dailyRange')} help={t('help.site.dailyRange')} value={sc.site.dailyRange} onChange={(v) => update((d) => (d.site.dailyRange = v ?? d.site.dailyRange))} quantity="dtemp" min={0} max={30} digits={1} />
+              <NumberField label={t('site.altitude')} help={t('help.site.altitude')} value={sc.site.altitude} onChange={(v) => update((d) => (d.site.altitude = v ?? d.site.altitude))} quantity="length" min={-500} max={6000} digits={0} />
+              <NumberField label={t('site.tInt')} help={t('help.site.tInt')} value={sc.site.tInt} onChange={(v) => update((d) => (d.site.tInt = v ?? d.site.tInt))} quantity="temp" min={10} max={35} digits={1} />
+              <NumberField label={t('site.rhInt')} help={t('help.site.rhInt')} value={sc.site.rhInt} onChange={(v) => update((d) => (d.site.rhInt = v ?? d.site.rhInt))} unit="%" min={10} max={90} digits={0} />
             </div>
+            {oa && <p className="note">{t('site.oa_state', `${u.n(oa.RH * 100, 0)} %`)}</p>}
           </Card>
 
           <Card title={t('room.title')}>
             <div className="fields">
               <NumberField label={t('room.length')} value={sc.room.length} onChange={(v) => update((d) => (d.room.length = v ?? d.room.length))} quantity="length" min={0.5} max={500} />
               <NumberField label={t('room.width')} value={sc.room.width} onChange={(v) => update((d) => (d.room.width = v ?? d.room.width))} quantity="length" min={0.5} max={500} />
-              <NumberField label={t('room.height')} value={sc.room.height} onChange={(v) => update((d) => (d.room.height = v ?? d.room.height))} quantity="length" min={1.5} max={40} />
+              <NumberField label={t('room.height')} help={t('help.room.height')} value={sc.room.height} onChange={(v) => update((d) => (d.room.height = v ?? d.room.height))} quantity="length" min={1.5} max={40} />
             </div>
             <div className="stats" style={{ marginTop: 16 }}>
               <Stat label={t('room.floorArea')} value={u.show('area', L.geometry.floorArea, 1)} />
@@ -123,9 +125,9 @@ export function LoadPanel({ sc, computed }: { sc: Scenario; computed: Computed }
             </div>
             <h3>{t('roof.title')}</h3>
             <div className="fields">
-              <CheckField label={t('roof.exposed')} checked={sc.roof.exposed} onChange={(v) => update((d) => (d.roof.exposed = v))} />
+              <CheckField label={t('roof.exposed')} help={t('help.roof.exposed')} checked={sc.roof.exposed} onChange={(v) => update((d) => (d.roof.exposed = v))} />
               <SelectField
-                label={t('roof.preset')}
+                label={t('roof.preset')} help={t('help.roof.preset')}
                 value={roofPreset}
                 onChange={(id) => {
                   const p = ROOF_PRESETS.find((x) => x.id === id)
@@ -133,16 +135,16 @@ export function LoadPanel({ sc, computed }: { sc: Scenario; computed: Computed }
                 }}
                 options={[...ROOF_PRESETS.map((p) => ({ value: p.id, label: t(p.nameKey) })), { value: 'custom', label: '—' }]}
               />
-              <NumberField label={t('roof.uValue')} value={sc.roof.uValue} onChange={(v) => update((d) => (d.roof.uValue = v ?? d.roof.uValue))} quantity="uvalue" min={0.05} max={10} />
-              <SelectField label={t('roof.color')} value={sc.roof.color} onChange={(v) => update((d) => (d.roof.color = v as SurfaceColor))} options={COLORS.map((c) => ({ value: c, label: t(`color.${c}`) }))} />
-              <SelectField label={t('roof.mass')} value={sc.roof.mass} onChange={(v) => update((d) => (d.roof.mass = v as MassClass))} options={MASSES.map((m) => ({ value: m, label: t(`mass.${m}`) }))} />
+              <NumberField label={t('roof.uValue')} help={t('help.roof.uValue')} value={sc.roof.uValue} onChange={(v) => update((d) => (d.roof.uValue = v ?? d.roof.uValue))} quantity="uvalue" min={0.05} max={10} />
+              <SelectField label={t('roof.color')} help={t('help.roof.color')} value={sc.roof.color} onChange={(v) => update((d) => (d.roof.color = v as SurfaceColor))} options={COLORS.map((c) => ({ value: c, label: t(`color.${c}`) }))} />
+              <SelectField label={t('roof.mass')} help={t('help.roof.mass')} value={sc.roof.mass} onChange={(v) => update((d) => (d.roof.mass = v as MassClass))} options={MASSES.map((m) => ({ value: m, label: t(`mass.${m}`) }))} />
               <SelectField
-                label={t('floor.kind')}
+                label={t('floor.kind')} help={t('help.floor.kind')}
                 value={sc.floor.kind}
                 onChange={(v) => update((d) => (d.floor.kind = v as Scenario['floor']['kind']))}
                 options={(['conditioned', 'unconditioned', 'ground'] as const).map((k) => ({ value: k, label: t(`floor.${k}`) }))}
               />
-              {sc.floor.kind === 'unconditioned' && <NumberField label={t('floor.uValue')} value={sc.floor.uValue} onChange={(v) => update((d) => (d.floor.uValue = v ?? d.floor.uValue))} quantity="uvalue" min={0.05} max={10} />}
+              {sc.floor.kind === 'unconditioned' && <NumberField label={t('floor.uValue')} help={t('help.floor.uValue')} value={sc.floor.uValue} onChange={(v) => update((d) => (d.floor.uValue = v ?? d.floor.uValue))} quantity="uvalue" min={0.05} max={10} />}
             </div>
           </Card>
 
@@ -162,39 +164,39 @@ export function LoadPanel({ sc, computed }: { sc: Scenario; computed: Computed }
 
           <Card title={t('int.title')}>
             <div className="fields">
-              <NumberField label={t('int.people')} value={sc.internal.people} onChange={(v) => update((d) => (d.internal.people = v))} unit="" nullable autoHint={String(L.people)} min={0} max={100000} digits={0} />
-              <NumberField label={t('int.areaPerPerson')} value={sc.internal.areaPerPerson} onChange={(v) => update((d) => (d.internal.areaPerPerson = v ?? d.internal.areaPerPerson))} quantity="area" min={0.3} max={500} />
-              <SelectField label={t('int.activity')} value={sc.internal.activity} onChange={(v) => update((d) => (d.internal.activity = v as ActivityId))} options={ACTIVITY_IDS.map((a) => ({ value: a, label: `${t(`act.${a}`)} (${ACTIVITIES[a].sensible}+${ACTIVITIES[a].latent} W)` }))} />
-              <NumberField label={t('int.lightingWPerM2')} value={sc.internal.lightingWPerM2} onChange={(v) => update((d) => (d.internal.lightingWPerM2 = v ?? 0))} quantity="wpm2" min={0} max={200} />
-              <NumberField label={t('int.lightingFactor')} value={sc.internal.lightingFactor} onChange={(v) => update((d) => (d.internal.lightingFactor = v ?? 1))} unit="—" min={0.5} max={2} />
-              <NumberField label={t('int.equipmentWPerM2')} value={sc.internal.equipmentWPerM2} onChange={(v) => update((d) => (d.internal.equipmentWPerM2 = v ?? 0))} quantity="wpm2" min={0} max={2000} />
-              <NumberField label={t('int.equipmentKW')} value={sc.internal.equipmentKW} onChange={(v) => update((d) => (d.internal.equipmentKW = v ?? 0))} quantity="power" min={0} max={50000} />
-              <NumberField label={t('int.diversityPeople')} value={sc.internal.diversityPeople} onChange={(v) => update((d) => (d.internal.diversityPeople = v ?? 1))} unit="—" min={0} max={1} />
-              <NumberField label={t('int.diversityLights')} value={sc.internal.diversityLights} onChange={(v) => update((d) => (d.internal.diversityLights = v ?? 1))} unit="—" min={0} max={1} />
-              <NumberField label={t('int.diversityEquipment')} value={sc.internal.diversityEquipment} onChange={(v) => update((d) => (d.internal.diversityEquipment = v ?? 1))} unit="—" min={0} max={1} />
+              <NumberField label={t('int.people')} help={t('help.int.people')} value={sc.internal.people} onChange={(v) => update((d) => (d.internal.people = v))} unit="" nullable autoHint={String(L.people)} min={0} max={100000} digits={0} />
+              <NumberField label={t('int.areaPerPerson')} help={t('help.int.areaPerPerson')} value={sc.internal.areaPerPerson} onChange={(v) => update((d) => (d.internal.areaPerPerson = v ?? d.internal.areaPerPerson))} quantity="area" min={0.3} max={500} />
+              <SelectField label={t('int.activity')} help={t('help.int.activity')} value={sc.internal.activity} onChange={(v) => update((d) => (d.internal.activity = v as ActivityId))} options={ACTIVITY_IDS.map((a) => ({ value: a, label: `${t(`act.${a}`)} (${ACTIVITIES[a].sensible}+${ACTIVITIES[a].latent} W)` }))} />
+              <NumberField label={t('int.lightingWPerM2')} help={t('help.int.lightingWPerM2')} value={sc.internal.lightingWPerM2} onChange={(v) => update((d) => (d.internal.lightingWPerM2 = v ?? 0))} quantity="wpm2" min={0} max={200} />
+              <NumberField label={t('int.lightingFactor')} help={t('help.int.lightingFactor')} value={sc.internal.lightingFactor} onChange={(v) => update((d) => (d.internal.lightingFactor = v ?? 1))} unit="—" min={0.5} max={2} />
+              <NumberField label={t('int.equipmentWPerM2')} help={t('help.int.equipmentWPerM2')} value={sc.internal.equipmentWPerM2} onChange={(v) => update((d) => (d.internal.equipmentWPerM2 = v ?? 0))} quantity="wpm2" min={0} max={2000} />
+              <NumberField label={t('int.equipmentKW')} help={t('help.int.equipmentKW')} value={sc.internal.equipmentKW} onChange={(v) => update((d) => (d.internal.equipmentKW = v ?? 0))} quantity="power" min={0} max={50000} />
+              <NumberField label={t('int.diversityPeople')} help={t('help.int.diversityPeople')} value={sc.internal.diversityPeople} onChange={(v) => update((d) => (d.internal.diversityPeople = v ?? 1))} unit="—" min={0} max={1} />
+              <NumberField label={t('int.diversityLights')} help={t('help.int.diversityLights')} value={sc.internal.diversityLights} onChange={(v) => update((d) => (d.internal.diversityLights = v ?? 1))} unit="—" min={0} max={1} />
+              <NumberField label={t('int.diversityEquipment')} help={t('help.int.diversityEquipment')} value={sc.internal.diversityEquipment} onChange={(v) => update((d) => (d.internal.diversityEquipment = v ?? 1))} unit="—" min={0} max={1} />
             </div>
           </Card>
 
           <Card title={t('vent.title')} hint={t('vent.hint')}>
             <div className="fields">
-              <SelectField label={t('vent.method')} value={sc.ventilation.method} onChange={(v) => update((d) => (d.ventilation.method = v as VentilationMethod))} options={(['per_person_area', 'ach', 'manual'] as const).map((m) => ({ value: m, label: t(`vent.${m}`) }))} />
+              <SelectField label={t('vent.method')} help={t('help.vent.method')} value={sc.ventilation.method} onChange={(v) => update((d) => (d.ventilation.method = v as VentilationMethod))} options={(['per_person_area', 'ach', 'manual'] as const).map((m) => ({ value: m, label: t(`vent.${m}`) }))} />
               {sc.ventilation.method === 'per_person_area' && (
                 <>
-                  <NumberField label={t('vent.perPersonLs')} value={sc.ventilation.perPersonLs} onChange={(v) => update((d) => (d.ventilation.perPersonLs = v ?? 0))} unit="L/s" min={0} max={100} />
-                  <NumberField label={t('vent.perAreaLsM2')} value={sc.ventilation.perAreaLsM2} onChange={(v) => update((d) => (d.ventilation.perAreaLsM2 = v ?? 0))} unit="L/s·m²" min={0} max={20} />
+                  <NumberField label={t('vent.perPersonLs')} help={t('help.vent.perPersonLs')} value={sc.ventilation.perPersonLs} onChange={(v) => update((d) => (d.ventilation.perPersonLs = v ?? 0))} unit="L/s" min={0} max={100} />
+                  <NumberField label={t('vent.perAreaLsM2')} help={t('help.vent.perAreaLsM2')} value={sc.ventilation.perAreaLsM2} onChange={(v) => update((d) => (d.ventilation.perAreaLsM2 = v ?? 0))} unit="L/s·m²" min={0} max={20} />
                 </>
               )}
-              {sc.ventilation.method === 'ach' && <NumberField label={t('vent.achOutdoor')} value={sc.ventilation.achOutdoor} onChange={(v) => update((d) => (d.ventilation.achOutdoor = v ?? 0))} unit="1/h" min={0} max={60} />}
-              {sc.ventilation.method === 'manual' && <NumberField label={t('vent.manualM3h')} value={sc.ventilation.manualM3h} onChange={(v) => update((d) => (d.ventilation.manualM3h = v ?? 0))} quantity="airflow" min={0} max={1e7} digits={0} />}
-              <NumberField label={t('vent.heatRecovery')} value={sc.ventilation.heatRecovery} onChange={(v) => update((d) => (d.ventilation.heatRecovery = v ?? 0))} unit="—" min={0} max={0.85} />
-              <NumberField label={t('vent.infiltrationACH')} value={sc.ventilation.infiltrationACH} onChange={(v) => update((d) => (d.ventilation.infiltrationACH = v ?? 0))} unit="1/h" min={0} max={20} />
+              {sc.ventilation.method === 'ach' && <NumberField label={t('vent.achOutdoor')} help={t('help.vent.achOutdoor')} value={sc.ventilation.achOutdoor} onChange={(v) => update((d) => (d.ventilation.achOutdoor = v ?? 0))} unit="1/h" min={0} max={60} />}
+              {sc.ventilation.method === 'manual' && <NumberField label={t('vent.manualM3h')} help={t('help.vent.manualM3h')} value={sc.ventilation.manualM3h} onChange={(v) => update((d) => (d.ventilation.manualM3h = v ?? 0))} quantity="airflow" min={0} max={1e7} digits={0} />}
+              <NumberField label={t('vent.heatRecovery')} help={t('help.vent.heatRecovery')} value={sc.ventilation.heatRecovery} onChange={(v) => update((d) => (d.ventilation.heatRecovery = v ?? 0))} unit="—" min={0} max={0.85} />
+              <NumberField label={t('vent.infiltrationACH')} help={t('help.vent.infiltrationACH')} value={sc.ventilation.infiltrationACH} onChange={(v) => update((d) => (d.ventilation.infiltrationACH = v ?? 0))} unit="1/h" min={0} max={20} />
             </div>
             <h3>{t('op.title')}</h3>
             <div className="fields">
-              <NumberField label={t('op.hoursPerDay')} value={sc.operation.hoursPerDay} onChange={(v) => update((d) => (d.operation.hoursPerDay = v ?? 0))} unit={t('common.hours_day')} min={0} max={24} digits={0} />
-              <NumberField label={t('op.safetyFactor')} value={sc.operation.safetyFactor} onChange={(v) => update((d) => (d.operation.safetyFactor = v ?? 0))} unit="%" min={0} max={100} digits={0} />
-              <NumberField label={t('op.fanHeatPct')} value={sc.operation.fanHeatPct} onChange={(v) => update((d) => (d.operation.fanHeatPct = v ?? 0))} unit="%" min={0} max={30} digits={1} />
-              <NumberField label={t('op.supplyDeltaT')} value={sc.operation.supplyDeltaT} onChange={(v) => update((d) => (d.operation.supplyDeltaT = v ?? 10))} quantity="dtemp" min={4} max={20} digits={1} />
+              <NumberField label={t('op.hoursPerDay')} help={t('help.op.hoursPerDay')} value={sc.operation.hoursPerDay} onChange={(v) => update((d) => (d.operation.hoursPerDay = v ?? 0))} unit={t('common.hours_day')} min={0} max={24} digits={0} />
+              <NumberField label={t('op.safetyFactor')} help={t('help.op.safetyFactor')} value={sc.operation.safetyFactor} onChange={(v) => update((d) => (d.operation.safetyFactor = v ?? 0))} unit="%" min={0} max={100} digits={0} />
+              <NumberField label={t('op.fanHeatPct')} help={t('help.op.fanHeatPct')} value={sc.operation.fanHeatPct} onChange={(v) => update((d) => (d.operation.fanHeatPct = v ?? 0))} unit="%" min={0} max={30} digits={1} />
+              <NumberField label={t('op.supplyDeltaT')} help={t('help.op.supplyDeltaT')} value={sc.operation.supplyDeltaT} onChange={(v) => update((d) => (d.operation.supplyDeltaT = v ?? 10))} quantity="dtemp" min={4} max={20} digits={1} />
             </div>
           </Card>
         </div>
@@ -230,8 +232,8 @@ function ResultsCard({ load: L, safetyFactor }: { load: LoadResult; safetyFactor
           }
           sub={`${u.n(alt.TR, 1)} TR · ${u.n(alt.BTUh / 1000, 0)} kBTU/h · ${u.n(alt.kcalh, 0)} kcal/h`}
         />
-        <Stat label={t('load.room_sensible')} value={`${u.n(L.roomSensible, 0)} W`} sub={`${t('load.room_latent')}: ${u.n(L.roomLatent, 0)} W`} />
-        <Stat label={t('load.oa_total')} value={`${u.n(L.outdoorSensible + L.outdoorLatent, 0)} W`} sub={u.show('airflow', L.outdoorM3h, 0)} />
+        <Stat label={t('load.room_sensible')} value={u.show('power', L.roomSensible / 1000, 2)} sub={`${t('load.room_latent')}: ${u.show('power', L.roomLatent / 1000, 2)}`} />
+        <Stat label={t('load.oa_total')} value={u.show('power', (L.outdoorSensible + L.outdoorLatent) / 1000, 2)} sub={u.show('airflow', L.outdoorM3h, 0)} />
         <Stat label={t('load.coil_total')} value={u.show('power', L.coilTotal / 1000, 2)} sub={`${t('load.safety')}: +${u.n(safetyFactor, 0)} %`} />
         <Stat label={t('load.shr')} value={u.n(L.shrRoom, 2)} />
         <Stat label={t('load.w_per_m2')} value={u.show('wpm2', L.wPerM2, 0)} sub={`${t('load.m2_per_tr')}: ${u.n(L.m2PerTR, 1)} m²/TR`} />

@@ -2,6 +2,7 @@ import { Alerts, Card, Stat } from '../ui/Field'
 import { useT, useUnits, type Computed } from '../../hooks'
 import type { Scenario } from '../../engine/types'
 import { PsychroChart } from '../charts/PsychroChart'
+import { AirSchematic } from '../charts/AirSchematic'
 
 export function AirPanel({ sc, computed }: { sc: Scenario; computed: Computed }) {
   const t = useT()
@@ -32,6 +33,10 @@ export function AirPanel({ sc, computed }: { sc: Scenario; computed: Computed })
           <Stat label={t('air.coil_load')} value={u.show('power', A.coilKW, 1)} sub={`${t('load.coil_total')}: ${u.show('power', L.coilTotal / 1000, 1)}`} />
         </div>
         <Alerts warnings={A.warnings} />
+      </Card>
+
+      <Card title={t('path.title')} hint={t('path.hint')}>
+        <AirSchematic air={A} />
       </Card>
 
       <Card title={t('air.chart_title')}>

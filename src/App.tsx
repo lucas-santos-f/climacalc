@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
-import { Moon, Sun } from 'lucide-react'
+import { Lightbulb, Moon, Sun } from 'lucide-react'
 import { decodeShare, useCurrentScenario, useStore, type Tab } from './state/store'
 import { useComputed, useT } from './hooks'
 import { LANGS } from './i18n'
@@ -12,6 +12,7 @@ import { AboutPanel } from './components/panels/AboutPanel'
 
 type Theme = 'light' | 'dark'
 const THEME_KEY = 'climacalc:theme'
+const INTRO_KEY = 'climacalc:intro-seen'
 
 function savedTheme(): Theme {
   try {
@@ -21,12 +22,30 @@ function savedTheme(): Theme {
   }
 }
 
+function introSeen(): boolean {
+  try {
+    return localStorage.getItem(INTRO_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 export default function App() {
   const t = useT()
   const sc = useCurrentScenario()
   const computed = useComputed(sc)
   const { lang, setLang, units, setUnits, tab, setTab, toast, importScenario, showToast } = useStore()
   const [theme, setTheme] = useState<Theme>(savedTheme)
+  const [intro, setIntro] = useState(() => !introSeen())
+
+  const closeIntro = () => {
+    setIntro(false)
+    try {
+      localStorage.setItem(INTRO_KEY, '1')
+    } catch {
+      // blocked storage only means the tip shows up again next visit
+    }
+  }
 
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -119,6 +138,15 @@ export default function App() {
           </div>
         </div>
         <ScenarioBar sc={sc} computed={computed} />
+        {intro && tab === 'load' && (
+          <div className="intro no-print">
+            <Lightbulb size={18} aria-hidden="true" />
+            <p>{t('intro.text')}</p>
+            <button type="button" className="btn small" onClick={closeIntro}>
+              {t('intro.dismiss')}
+            </button>
+          </div>
+        )}
         {tab === 'load' && <LoadPanel sc={sc} computed={computed} />}
         {tab === 'air' && <AirPanel sc={sc} computed={computed} />}
         {tab === 'equipment' && <EquipmentPanel sc={sc} computed={computed} />}
